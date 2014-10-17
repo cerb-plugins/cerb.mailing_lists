@@ -197,6 +197,85 @@ class PageSection_ProfilesMailingList extends Extension_PageSection {
 		$tpl->display('devblocks:cerb.mailing_lists::mailing_list/profile/tab_members.tpl');
 	}
 	
+	function showImportMembersFilePopupAction() {
+		@$list_id = DevblocksPlatform::importGPC($_REQUEST['list_id'],'integer');
+		
+		if(false == ($mailing_list = DAO_MailingList::get($list_id)))
+			return;
+		
+		$tpl = DevblocksPlatform::getTemplateService();
+
+		$tpl->assign('mailing_list', $mailing_list);
+		
+		$tpl->display('devblocks:cerb.mailing_lists::mailing_list/profile/popup_import_members_file.tpl');
+	}
+	
+	function showImportMembersMapPopupAction() {
+		@$list_id = DevblocksPlatform::importGPC($_REQUEST['list_id'],'integer');
+		@$file_id = DevblocksPlatform::importGPC($_REQUEST['file_id'],'integer');
+		
+		if(false == ($mailing_list = DAO_MailingList::get($list_id)))
+			return;
+		
+		if(false == ($file = DAO_Attachment::get($file_id)))
+			return;
+		
+		$tpl = DevblocksPlatform::getTemplateService();
+		
+		$fp = DevblocksPlatform::getTempFile();
+		
+		if($file->getFileContents($fp)) {
+			@$columns = fgetcsv($fp);
+			
+			if(is_array($columns))
+				$tpl->assign('columns', $columns);
+		}
+		
+		// [TODO] Error handling
+
+		$tpl->assign('mailing_list', $mailing_list);
+		$tpl->assign('file', $file);
+		
+		$tpl->display('devblocks:cerb.mailing_lists::mailing_list/profile/popup_import_members_map.tpl');
+	}
+	
+	function saveImportPopupAction() {
+		@$list_id = DevblocksPlatform::importGPC($_REQUEST['list_id'],'integer');
+		@$file_id = DevblocksPlatform::importGPC($_REQUEST['file_id'],'integer');
+		@$column_idx = DevblocksPlatform::importGPC($_REQUEST['column'],'integer');
+		
+		if(false == ($mailing_list = DAO_MailingList::get($list_id)))
+			return;
+		
+		if(false == ($file = DAO_Attachment::get($file_id)))
+			return;
+
+		$fp = DevblocksPlatform::getTempFile();
+		
+		// [TODO] Update marquee with pending/post import count
+		
+		if($file->getFileContents($fp)) {
+			// Skip headers
+			// [TODO] This could be an option
+			@fgetcsv($fp);
+			
+			while(@$columns = fgetcsv($fp)) {
+				if(is_array($columns) && isset($columns[$column_idx])) {
+					$email_to_find = $columns[$column_idx];
+					
+					var_dump($email_to_find);
+					
+					if($address = DAO_Address::lookupAddress($email_to_find, true)) {
+						// [TODO] We want to determine if the member is already on the list
+						//		If so, are we updating their status or not?
+						
+						DAO_MailingList::addMember($address->id, $list_id, '');
+					}
+				}
+			}
+		}
+	}
+	
 	function showBroadcastsTabAction() {
 		@$list_id = DevblocksPlatform::importGPC($_REQUEST['id'],'integer');
 		
