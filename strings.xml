@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tmx>
+<tmx version="1.4">
+	<header datatype="winres" segtype="sentence" adminlang="en-us" srclang="en-us" o-tmf="abc" />
+	<body>
+
+		<!-- Plugin Strings -->
+
+		<tu tuid='cerb.mailing_lists.common.mailing_list'>
+			<tuv xml:lang="en_US"><seg>Mailing List</seg></tuv>
+		</tu>
+		
+		<tu tuid='cerb.mailing_lists.common.mailing_lists'>
+			<tuv xml:lang="en_US"><seg>Mailing Lists</seg></tuv>
+		</tu>
+		
+		<!-- MailingList -->
+		
+		<tu tuid='dao.mailing_list.num_members'>
+			<tuv xml:lang="en_US"><seg># Members</seg></tuv>
+		</tu>
+		
+	</body>
+</tmx>

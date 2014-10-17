@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.devblocks.com/schema/plugin.xsd">
+	<id>cerb.mailing_lists</id>
+	<name>Mailing Lists</name>
+	<description>Enhanced mailing list functionality.</description>
+	<author>Webgroup Media, LLC.</author>
+	<version>0.0.1</version>
+	<link>http://cerbweb.com/book/latest/developer_guide/plugins/plugin.xml</link>
+	<!--<image>plugin.png</image>-->
+
+	<!-- Requirements -->
+
+	<requires>
+		<app_version min="6.8" max="6.8.99" />
+		<!--<php_extension name="curl" />-->
+	</requires>
+
+	<!-- Plugin Dependencies -->
+	
+	<dependencies>
+		<require plugin_id="cerberusweb.core" version="6.8.0" />
+	</dependencies>
+
+	<!-- Patches -->
+	
+	<patches>
+		<patch version="6.8.0" revision="1" file="patches/6.8.0.php" />
+	</patches>
+
+	<!-- Controller Routing -->
+
+	<!--
+	<uri_routing>
+		<uri name="dostuff" controller="example.controller" />
+	</uri_routing>
+	-->
+	
+	<!-- Classloader -->
+	
+	<class_loader>
+		<file path="api/dao/mailing_list.php">
+			<class name="Context_MailingList" />
+			<class name="DAO_MailingList" />
+			<class name="Model_MailingList" />
+			<class name="SearchFields_MailingList" />
+			<class name="View_MailingList" />
+		</file>
+
+		<file path="api/dao/mailing_list_broadcast.php">
+			<class name="Context_MailingListBroadcast" />
+			<class name="DAO_MailingListBroadcast" />
+			<class name="Model_MailingListBroadcast" />
+			<class name="SearchFields_MailingListBroadcast" />
+			<class name="View_MailingListBroadcast" />
+		</file>
+				
+		<file path="api/dao/mailing_list_member.php">
+			<class name="Context_MailingListMember" />
+			<class name="DAO_MailingListMember" />
+			<class name="Model_MailingListMember" />
+			<class name="SearchFields_MailingListMember" />
+			<class name="View_MailingListMember" />
+		</file>
+	</class_loader>
+
+	<!-- Extensions -->
+
+	<extensions>
+	
+		<!-- Contexts -->
+		
+		<extension point="devblocks.context">
+			<id>cerberusweb.contexts.mailing_list</id>
+			<name>Mailing List</name>
+			<class>
+				<file>api/dao/mailing_list.php</file>
+				<name>Context_MailingList</name>
+			</class>
+			<params>
+				<param key="alias" value="mailing_list" />
+				<param key="dao_class" value="DAO_MailingList" />
+				<param key="view_class" value="View_MailingList" />
+				<param key="options">
+					<value>
+						<data key="create" />
+						<data key="custom_fields" />
+						<data key="find" />
+						<data key="snippets" />
+						<data key="va_variable" />
+						<data key="workspace" />
+					</value>
+				</param>
+			</params>
+		</extension>
+		
+		<extension point="devblocks.context">
+			<id>cerberusweb.contexts.mailing_list.broadcast</id>
+			<name>Mailing List Broadcast</name>
+			<class>
+				<file>api/dao/mailing_list_broadcast.php</file>
+				<name>Context_MailingListBroadcast</name>
+			</class>
+			<params>
+				<param key="alias" value="mailing_list_broadcast" />
+				<param key="dao_class" value="DAO_MailingListBroadcast" />
+				<param key="view_class" value="View_MailingListBroadcast" />
+				<param key="options">
+					<value>
+						<data key="create" />
+						<data key="custom_fields" />
+						<data key="find" />
+						<data key="snippets" />
+						<data key="va_variable" />
+						<data key="workspace" />
+					</value>
+				</param>
+			</params>
+		</extension>
+		
+		<extension point="devblocks.context">
+			<id>cerberusweb.contexts.mailing_list.member</id>
+			<name>Mailing List Member</name>
+			<class>
+				<file>api/dao/mailing_list_member.php</file>
+				<name>Context_MailingListMember</name>
+			</class>
+			<params>
+				<param key="alias" value="mailing_list_member" />
+				<param key="dao_class" value="DAO_MailingListMember" />
+				<param key="view_class" value="View_MailingListMember" />
+				<param key="options">
+					<value>
+						<data key="create" />
+						<data key="custom_fields" />
+						<data key="find" />
+						<data key="snippets" />
+						<data key="va_variable" />
+						<data key="workspace" />
+					</value>
+				</param>
+			</params>
+		</extension>
+		
+		<!-- Profile Page Sections -->
+		
+		<extension point="cerberusweb.ui.page.section">
+			<id>wgm.page.profiles.mailing_list</id>
+			<name>Mailing List Profile</name>
+			<class>
+				<file>api/profile/mailing_list.php</file>
+				<name>PageSection_ProfilesMailingList</name>
+			</class>
+			<params>
+				<param key="page_id" value="core.page.profiles" />
+				<param key="uri" value="mailing_list" />
+			</params>
+		</extension>
+		
+		<extension point="cerberusweb.ui.page.section">
+			<id>wgm.page.profiles.mailing_list_broadcast</id>
+			<name>Mailing List Broadcast Section</name>
+			<class>
+				<file>api/profile/mailing_list_broadcast.php</file>
+				<name>PageSection_ProfilesMailingListBroadcast</name>
+			</class>
+			<params>
+				<param key="page_id" value="core.page.profiles" />
+				<param key="uri" value="mailing_list_broadcast" />
+			</params>
+		</extension>
+		
+		<extension point="cerberusweb.ui.page.section">
+			<id>wgm.page.profiles.mailing_list_member</id>
+			<name>Mailing List Member Section</name>
+			<class>
+				<file>api/profile/mailing_list_member.php</file>
+				<name>PageSection_ProfilesMailingListMember</name>
+			</class>
+			<params>
+				<param key="page_id" value="core.page.profiles" />
+				<param key="uri" value="mailing_list_member" />
+			</params>
+		</extension>
+
+	
+	</extensions>
+</plugin>
