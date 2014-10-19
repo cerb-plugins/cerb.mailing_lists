@@ -66,7 +66,18 @@ class PageSection_ProfilesMailingList extends Extension_PageSection {
 			'type' => Model_CustomField::TYPE_DATE,
 			'value' => $mailing_list->updated_at,
 		);
-			
+		
+		$properties['num_members'] = array(
+			'label' => ucfirst($translate->_('dao.mailing_list.num_members')),
+			'type' => Model_CustomField::TYPE_NUMBER,
+			'value' => $mailing_list->num_members,
+		);
+	
+		$properties['num_broadcasts'] = array(
+			'label' => ucfirst($translate->_('dao.mailing_list.num_broadcasts')),
+			'type' => Model_CustomField::TYPE_NUMBER,
+			'value' => $mailing_list->num_broadcasts,
+		);
 	
 		// Custom Fields
 

@@ -20,6 +20,7 @@ class DAO_MailingList extends Cerb_ORMHelper {
 	const NAME = 'name';
 	const CREATED_AT = 'created_at';
 	const UPDATED_AT = 'updated_at';
+	const NUM_BROADCASTS = 'num_broadcasts';
 	const NUM_MEMBERS = 'num_members';
 
 	static function create($fields) {
@@ -74,6 +75,25 @@ class DAO_MailingList extends Cerb_ORMHelper {
 	
 	static function updateWhere($fields, $where) {
 		parent::_updateWhere('mailing_list', $fields, $where);
+		self::clearCache();
+	}
+	
+	static function updateBroadcastCount($ids) {
+		if(!is_array($ids))
+			$ids = array($ids);
+		
+		$db = DevblocksPlatform::getDatabaseService();
+		
+		foreach($ids as $id) {
+			$db->Execute(sprintf(
+				"UPDATE mailing_list ".
+				"SET num_broadcasts = (SELECT COUNT(id) FROM mailing_list_broadcast WHERE list_id = %d) ".
+				"WHERE id = %d",
+				$id,
+				$id
+			));
+		}
+		
 	}
 	
 	/**
@@ -89,7 +109,7 @@ class DAO_MailingList extends Cerb_ORMHelper {
 		list($where_sql, $sort_sql, $limit_sql) = self::_getWhereSQL($where, $sortBy, $sortAsc, $limit);
 		
 		// SQL
-		$sql = "SELECT id, name, created_at, updated_at, num_members ".
+		$sql = "SELECT id, name, created_at, updated_at, num_broadcasts, num_members ".
 			"FROM mailing_list ".
 			$where_sql.
 			$sort_sql.
@@ -129,6 +149,7 @@ class DAO_MailingList extends Cerb_ORMHelper {
 			$object->name = $row['name'];
 			$object->created_at = $row['created_at'];
 			$object->updated_at = $row['updated_at'];
+			$object->num_broadcasts = $row['num_broadcasts'];
 			$object->num_members = $row['num_members'];
 			$objects[$object->id] = $object;
 		}
@@ -182,11 +203,13 @@ class DAO_MailingList extends Cerb_ORMHelper {
 			"mailing_list.name as %s, ".
 			"mailing_list.created_at as %s, ".
 			"mailing_list.updated_at as %s, ".
+			"mailing_list.num_broadcasts as %s, ".
 			"mailing_list.num_members as %s ",
 				SearchFields_MailingList::ID,
 				SearchFields_MailingList::NAME,
 				SearchFields_MailingList::CREATED_AT,
 				SearchFields_MailingList::UPDATED_AT,
+				SearchFields_MailingList::NUM_BROADCASTS,
 				SearchFields_MailingList::NUM_MEMBERS
 			);
 			
@@ -347,6 +370,7 @@ class SearchFields_MailingList implements IDevblocksSearchFields {
 	const NAME = 'm_name';
 	const CREATED_AT = 'm_created_at';
 	const UPDATED_AT = 'm_updated_at';
+	const NUM_BROADCASTS = 'm_num_broadcasts';
 	const NUM_MEMBERS = 'm_num_members';
 
 	const VIRTUAL_CONTEXT_LINK = '*_context_link';
@@ -367,6 +391,7 @@ class SearchFields_MailingList implements IDevblocksSearchFields {
 			self::NAME => new DevblocksSearchField(self::NAME, 'mailing_list', 'name', $translate->_('common.name'), Model_CustomField::TYPE_SINGLE_LINE),
 			self::CREATED_AT => new DevblocksSearchField(self::CREATED_AT, 'mailing_list', 'created_at', $translate->_('common.created'), Model_CustomField::TYPE_DATE),
 			self::UPDATED_AT => new DevblocksSearchField(self::UPDATED_AT, 'mailing_list', 'updated_at', $translate->_('common.updated'), Model_CustomField::TYPE_DATE),
+			self::NUM_BROADCASTS => new DevblocksSearchField(self::NUM_BROADCASTS, 'mailing_list', 'num_broadcasts', $translate->_('dao.mailing_list.num_broadcasts'), Model_CustomField::TYPE_NUMBER),
 			self::NUM_MEMBERS => new DevblocksSearchField(self::NUM_MEMBERS, 'mailing_list', 'num_members', $translate->_('dao.mailing_list.num_members'), Model_CustomField::TYPE_NUMBER),
 
 			self::VIRTUAL_CONTEXT_LINK => new DevblocksSearchField(self::VIRTUAL_CONTEXT_LINK, '*', 'context_link', $translate->_('common.links'), null),
@@ -397,6 +422,7 @@ class Model_MailingList {
 	public $name;
 	public $created_at;
 	public $updated_at;
+	public $num_broadcasts;
 	public $num_members;
 };
 
@@ -415,6 +441,7 @@ class View_MailingList extends C4_AbstractView implements IAbstractView_Subtotal
 		$this->view_columns = array(
 			SearchFields_MailingList::NAME,
 			SearchFields_MailingList::NUM_MEMBERS,
+			SearchFields_MailingList::NUM_BROADCASTS,
 			SearchFields_MailingList::UPDATED_AT,
 		);
 		
@@ -553,6 +580,7 @@ class View_MailingList extends C4_AbstractView implements IAbstractView_Subtotal
 				break;
 				
 			case SearchFields_MailingList::ID:
+			case SearchFields_MailingList::NUM_BROADCASTS:
 			case SearchFields_MailingList::NUM_MEMBERS:
 				$tpl->display('devblocks:cerberusweb.core::internal/views/criteria/__number.tpl');
 				break;
@@ -636,6 +664,7 @@ class View_MailingList extends C4_AbstractView implements IAbstractView_Subtotal
 				break;
 				
 			case SearchFields_MailingList::ID:
+			case SearchFields_MailingList::NUM_BROADCASTS:
 			case SearchFields_MailingList::NUM_MEMBERS:
 				$criteria = new DevblocksSearchCriteria($field,$oper,$value);
 				break;
@@ -808,6 +837,7 @@ class Context_MailingList extends Extension_DevblocksContext implements IDevbloc
 			'name' => $prefix.$translate->_('common.name'),
 			'created_at' => $prefix.$translate->_('common.created'),
 			'updated_at' => $prefix.$translate->_('common.updated'),
+			'num_broadcasts' => $prefix.$translate->_('dao.mailing_list.num_broadcasts'),
 			'num_members' => $prefix.$translate->_('dao.mailing_list.num_members'),
 			'record_url' => $prefix.$translate->_('common.url.record'),
 		);
@@ -819,6 +849,7 @@ class Context_MailingList extends Extension_DevblocksContext implements IDevbloc
 			'name' => Model_CustomField::TYPE_SINGLE_LINE,
 			'created_at' => Model_CustomField::TYPE_DATE,
 			'updated_at' => Model_CustomField::TYPE_DATE,
+			'num_broadcasts' => Model_CustomField::TYPE_NUMBER,
 			'num_members' => Model_CustomField::TYPE_NUMBER,
 			'record_url' => Model_CustomField::TYPE_URL,
 		);
@@ -844,6 +875,7 @@ class Context_MailingList extends Extension_DevblocksContext implements IDevbloc
 			$token_values['name'] = $mailing_list->name;
 			$token_values['created_at'] = $mailing_list->created_at;
 			$token_values['updated_at'] = $mailing_list->updated_at;
+			$token_values['num_broadcasts'] = $mailing_list->num_broadcasts;
 			$token_values['num_members'] = $mailing_list->num_members;
 			
 			// Custom fields

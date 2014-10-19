@@ -14,6 +14,7 @@ if(!isset($tables['mailing_list'])) {
 			created_at INT UNSIGNED NOT NULL DEFAULT 0,
 			updated_at INT UNSIGNED NOT NULL DEFAULT 0,
 			num_members INT UNSIGNED NOT NULL DEFAULT 0,
+			num_broadcasts INT UNSIGNED NOT NULL DEFAULT 0,
 			PRIMARY KEY (id)
 		) ENGINE=%s;
 	", APP_DB_ENGINE);
