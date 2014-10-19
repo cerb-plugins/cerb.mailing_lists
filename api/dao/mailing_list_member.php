@@ -798,15 +798,17 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 		$mailing_list_member = DAO_MailingListMember::get($context_id);
 		$url_writer = DevblocksPlatform::getUrlService();
 		
+		$label = $mailing_list_member->getLabel();
+		
 		$url = $this->profileGetUrl($context_id);
-		$friendly = DevblocksPlatform::strToPermalink($mailing_list_member->name);
+		$friendly = DevblocksPlatform::strToPermalink($label);
 		
 		if(!empty($friendly))
 			$url .= '-' . $friendly;
 		
 		return array(
 			'id' => $mailing_list_member->id,
-			'name' => $mailing_list_member->name,
+			'name' => $label,
 			'permalink' => $url,
 		);
 	}
@@ -1014,6 +1016,13 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 		if(!empty($context_id) && null != ($mailing_list_member = DAO_MailingListMember::get($context_id))) {
 			$tpl->assign('model', $mailing_list_member);
 		}
+		
+		// Mailing lists
+		
+		$mailing_lists = DAO_MailingList::getAll();
+		$tpl->assign('mailing_lists', $mailing_lists);
+		
+		// Custom fields
 		
 		$custom_fields = DAO_CustomField::getByContext(CerberusContexts::CONTEXT_MAILING_LIST_MEMBER, false);
 		$tpl->assign('custom_fields', $custom_fields);

@@ -527,7 +527,13 @@ class View_MailingListBroadcast extends C4_AbstractView implements IAbstractView
 		$tpl->assign('id', $this->id);
 		$tpl->assign('view', $this);
 
+		// Mailing lists
+		
+		$mailing_lists = DAO_MailingList::getAll();
+		$tpl->assign('mailing_lists', $mailing_lists);
+		
 		// Custom fields
+		
 		$custom_fields = DAO_CustomField::getByContext(CerberusContexts::CONTEXT_MAILING_LIST_BROADCAST);
 		$tpl->assign('custom_fields', $custom_fields);
 
@@ -944,6 +950,13 @@ class Context_MailingListBroadcast extends Extension_DevblocksContext implements
 		if(!empty($context_id) && null != ($mailing_list_broadcast = DAO_MailingListBroadcast::get($context_id))) {
 			$tpl->assign('model', $mailing_list_broadcast);
 		}
+		
+		// Mailing lists
+		
+		$mailing_lists = DAO_MailingList::getAll();
+		$tpl->assign('mailing_lists', $mailing_lists);
+		
+		// Custom fields
 		
 		$custom_fields = DAO_CustomField::getByContext(CerberusContexts::CONTEXT_MAILING_LIST_BROADCAST, false);
 		$tpl->assign('custom_fields', $custom_fields);

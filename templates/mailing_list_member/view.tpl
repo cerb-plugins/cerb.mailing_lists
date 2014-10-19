@@ -94,7 +94,7 @@
 				{/if}
 				</td>
 			
-			{elseif $column == "m_created_at"}
+			{elseif $column == "m_created_at" || $column == "m_updated_at"}
 				<td title="{$result.$column|devblocks_date}">
 					{if !empty($result.$column)}
 						{$result.$column|devblocks_prettytime}&nbsp;

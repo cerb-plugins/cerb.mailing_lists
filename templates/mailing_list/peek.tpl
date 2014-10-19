@@ -17,20 +17,6 @@
 				<input type="text" name="name" value="{$model->name}" style="width:98%;">
 			</td>
 		</tr>
-		
-		{* Watchers *}
-		<tr>
-			<td width="0%" nowrap="nowrap" valign="top" align="right">{$translate->_('common.watchers')|capitalize}: </td>
-			<td width="100%">
-				{if empty($model->id)}
-					<button type="button" class="chooser_watcher"><span class="cerb-sprite sprite-view"></span></button>
-					<ul class="chooser-container bubbles" style="display:block;"></ul>
-				{else}
-					{$object_watchers = DAO_ContextLink::getContextLinks(CerberusContexts::CONTEXT_MAILING_LIST, array($model->id), CerberusContexts::CONTEXT_WORKER)}
-					{include file="devblocks:cerberusweb.core::internal/watchers/context_follow_button.tpl" context=CerberusContexts::CONTEXT_MAILING_LIST context_id=$model->id full=true}
-				{/if}
-			</td>
-		</tr>
 	</table>
 	
 </fieldset>
@@ -43,14 +29,6 @@
 {/if}
 
 {include file="devblocks:cerberusweb.core::internal/custom_fieldsets/peek_custom_fieldsets.tpl" context=CerberusContexts::CONTEXT_MAILING_LIST context_id=$model->id}
-
-{* Comments *}
-{include file="devblocks:cerberusweb.core::internal/peek/peek_comments_pager.tpl" comments=$comments}
-
-<fieldset class="peek">
-	<legend>{'common.comment'|devblocks_translate|capitalize}</legend>
-	<textarea name="comment" rows="5" cols="45" style="width:98%; title="{'comment.notify.at_mention'|devblocks_translate}"></textarea>
-</fieldset>
 
 {if !empty($model->id)}
 <fieldset style="display:none;" class="delete">
