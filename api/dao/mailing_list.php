@@ -16,6 +16,8 @@
 ***********************************************************************/
 
 class DAO_MailingList extends Cerb_ORMHelper {
+	const _CACHE_ALL = 'dao.mailing_list.all';
+	
 	const ID = 'id';
 	const NAME = 'name';
 	const CREATED_AT = 'created_at';
@@ -23,6 +25,11 @@ class DAO_MailingList extends Cerb_ORMHelper {
 	const NUM_BROADCASTS = 'num_broadcasts';
 	const NUM_MEMBERS = 'num_members';
 
+	static public function clearCache() {
+		$cache = DevblocksPlatform::getCacheService();
+		$cache->remove(self::_CACHE_ALL);
+	}
+	
 	static function create($fields) {
 		$db = DevblocksPlatform::getDatabaseService();
 		
@@ -71,6 +78,8 @@ class DAO_MailingList extends Cerb_ORMHelper {
 				DevblocksPlatform::markContextChanged(CerberusContexts::CONTEXT_MAILING_LIST, $batch_ids);
 			}
 		}
+		
+		self::clearCache();
 	}
 	
 	static function updateWhere($fields, $where) {
@@ -94,6 +103,17 @@ class DAO_MailingList extends Cerb_ORMHelper {
 			));
 		}
 		
+		self::clearCache();
+	}
+	
+	static function getAll($nocache=false) {
+		$cache = DevblocksPlatform::getCacheService();
+		if($nocache || null === ($lists = $cache->load(self::_CACHE_ALL))) {
+			$lists = DAO_MailingList::getWhere(null, DAO_MailingList::NAME, true);
+			$cache->save($lists, self::_CACHE_ALL);
+		}
+		
+		return $lists;
 	}
 	
 	/**
@@ -125,10 +145,7 @@ class DAO_MailingList extends Cerb_ORMHelper {
 	 * @return Model_MailingList
 	 */
 	static function get($id) {
-		$objects = self::getWhere(sprintf("%s = %d",
-			self::ID,
-			$id
-		));
+		$objects = self::getAll();
 		
 		if(isset($objects[$id]))
 			return $objects[$id];
@@ -186,6 +203,7 @@ class DAO_MailingList extends Cerb_ORMHelper {
 			)
 		);
 		
+		self::clearCache();
 		return true;
 	}
 	
