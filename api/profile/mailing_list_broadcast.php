@@ -114,13 +114,21 @@ class PageSection_ProfilesMailingListBroadcast extends Extension_PageSection {
 			
 		} else {
 			@$name = DevblocksPlatform::importGPC($_REQUEST['name'], 'string', '');
+			@$list_id = DevblocksPlatform::importGPC($_REQUEST['list_id'], 'integer', 0);
 			
 			if(empty($id)) { // New
+				if(empty($list_id))
+					return false;
+				
 				$fields = array(
+					DAO_MailingListBroadcast::CREATED_AT => time(),
 					DAO_MailingListBroadcast::UPDATED_AT => time(),
 					DAO_MailingListBroadcast::NAME => $name,
+					DAO_MailingListBroadcast::LIST_ID=> $list_id,
 				);
 				$id = DAO_MailingListBroadcast::create($fields);
+				
+				DAO_MailingList::updateBroadcastCount($list_id);
 				
 				// Watchers
 				@$add_watcher_ids = DevblocksPlatform::sanitizeArray(DevblocksPlatform::importGPC($_REQUEST['add_watcher_ids'],'array',array()),'integer',array('unique','nonzero'));
