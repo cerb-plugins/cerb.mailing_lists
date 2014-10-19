@@ -889,6 +889,34 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 			$token_values['record_url'] = $url_writer->writeNoProxy(sprintf("c=profiles&type=mailing_list_member&id=%d-%s",$mailing_list_member->id, DevblocksPlatform::strToPermalink($_label)), true);
 		}
 		
+		// Mailing List
+		$merge_token_labels = array();
+		$merge_token_values = array();
+		CerberusContexts::getContext(CerberusContexts::CONTEXT_MAILING_LIST, null, $merge_token_labels, $merge_token_values, null, true);
+
+		CerberusContexts::merge(
+			'list_',
+			$prefix,
+			$merge_token_labels,
+			$merge_token_values,
+			$token_labels,
+			$token_values
+		);
+		
+		// Email address
+		$merge_token_labels = array();
+		$merge_token_values = array();
+		CerberusContexts::getContext(CerberusContexts::CONTEXT_ADDRESS, null, $merge_token_labels, $merge_token_values, null, true);
+
+		CerberusContexts::merge(
+			'address_',
+			$prefix,
+			$merge_token_labels,
+			$merge_token_values,
+			$token_labels,
+			$token_values
+		);
+		
 		return true;
 	}
 
