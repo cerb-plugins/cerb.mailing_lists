@@ -290,6 +290,8 @@ class PageSection_ProfilesMailingList extends Extension_PageSection {
 					}
 				}
 			}
+			
+			DAO_MailingList::updateMemberCount($list_id);
 		}
 	}
 	

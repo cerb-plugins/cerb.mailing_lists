@@ -87,6 +87,25 @@ class DAO_MailingList extends Cerb_ORMHelper {
 		self::clearCache();
 	}
 	
+	static function updateMemberCount($ids) {
+		if(!is_array($ids))
+			$ids = array($ids);
+		
+		$db = DevblocksPlatform::getDatabaseService();
+		
+		foreach($ids as $id) {
+			$db->Execute(sprintf(
+				"UPDATE mailing_list ".
+				"SET num_members = (SELECT COUNT(id) FROM mailing_list_member WHERE list_id = %d AND status IN ('','O')) ".
+				"WHERE id = %d",
+				$id,
+				$id
+			));
+		}
+		
+		self::clearCache();
+	}
+	
 	static function updateBroadcastCount($ids) {
 		if(!is_array($ids))
 			$ids = array($ids);
