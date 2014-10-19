@@ -1,1 +1,1 @@
-[worklist of broadcasts w/ req filter of list]
+{include file="devblocks:cerberusweb.core::internal/views/search_and_view.tpl" view=$view}

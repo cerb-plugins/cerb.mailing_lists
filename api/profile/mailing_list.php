@@ -288,6 +288,25 @@ class PageSection_ProfilesMailingList extends Extension_PageSection {
 		
 		$tpl->assign('mailing_list', $mailing_list);
 		
+		$defaults = new C4_AbstractViewModel();
+		$defaults->id = 'mailing_list_broadcasts';
+		$defaults->class_name = 'View_MailingListBroadcast';
+		$defaults->name = 'Broadcasts';
+		$defaults->is_ephemeral = true;
+		
+		if(false != ($view = C4_AbstractViewLoader::getView($defaults->id, $defaults))) {
+			$params_required = array(
+				//SearchFields_MailingListMember::LIST_ID => 
+				new DevblocksSearchCriteria(SearchFields_MailingListBroadcast::LIST_ID, '=', $mailing_list->id),
+			);
+			
+			$view->addParamsRequired($params_required, true);
+			
+			C4_AbstractViewLoader::setView($view->id, $view);
+			
+			$tpl->assign('view', $view);
+		}
+		
 		$tpl->display('devblocks:cerb.mailing_lists::mailing_list/profile/tab_broadcasts.tpl');
 	}
 	
