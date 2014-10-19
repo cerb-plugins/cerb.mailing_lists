@@ -20,16 +20,27 @@
 		</tr>
 		*}
 		
-		{* Watchers *}
+		{if empty($model->id)}		
 		<tr>
-			<td width="0%" nowrap="nowrap" valign="top" align="right">{$translate->_('common.watchers')|capitalize}: </td>
-			<td width="100%">
+			<td width="1%" nowrap="nowrap"><b>{'common.email'|devblocks_translate}:</b></td>
+			<td width="99%">
+				<input type="text" name="email" value="" placeholder="user@example.com" style="width:98%;">
+			</td>
+		</tr>
+		{/if}
+		
+		<tr>
+			<td width="1%" nowrap="nowrap"><b>{'cerb.mailing_lists.common.mailing_list'|devblocks_translate}:</b></td>
+			<td width="99%">
 				{if empty($model->id)}
-					<button type="button" class="chooser_watcher"><span class="cerb-sprite sprite-view"></span></button>
-					<ul class="chooser-container bubbles" style="display:block;"></ul>
+				<select name="list_id">
+					{foreach from=$mailing_lists item=mailing_list}
+					<option value="{$mailing_list->id}">{$mailing_list->name}</option>
+					{/foreach}
+				</select>
 				{else}
-					{$object_watchers = DAO_ContextLink::getContextLinks(CerberusContexts::CONTEXT_MAILING_LIST_MEMBER, array($model->id), CerberusContexts::CONTEXT_WORKER)}
-					{include file="devblocks:cerberusweb.core::internal/watchers/context_follow_button.tpl" context=CerberusContexts::CONTEXT_MAILING_LIST_MEMBER context_id=$model->id full=true}
+					{$list = $mailing_lists.{$model->list_id}}
+					{$list->name}
 				{/if}
 			</td>
 		</tr>
