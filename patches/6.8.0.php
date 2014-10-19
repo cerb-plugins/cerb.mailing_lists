@@ -29,6 +29,7 @@ if(!isset($tables['mailing_list_member'])) {
 			list_id INT UNSIGNED NOT NULL DEFAULT 0,
 			address_id INT UNSIGNED NOT NULL DEFAULT 0,
 			created_at INT UNSIGNED NOT NULL DEFAULT 0,
+			updated_at INT UNSIGNED NOT NULL DEFAULT 0,
 			status CHAR(1) NOT NULL DEFAULT '',
 			PRIMARY KEY (id),
 			UNIQUE list_and_address (list_id, address_id)

@@ -67,7 +67,7 @@ class DAO_MailingList extends Cerb_ORMHelper {
 				);
 				
 				// Log the context update
-				//DevblocksPlatform::markContextChanged(CerberusContexts::CONTEXT_, $batch_ids);
+				DevblocksPlatform::markContextChanged(CerberusContexts::CONTEXT_MAILING_LIST, $batch_ids);
 			}
 		}
 	}

@@ -55,6 +55,12 @@ class PageSection_ProfilesMailingList extends Extension_PageSection {
 			'value' => $mailing_list->name,
 		);
 			
+		$properties['created'] = array(
+			'label' => ucfirst($translate->_('common.created')),
+			'type' => Model_CustomField::TYPE_DATE,
+			'value' => $mailing_list->created_at,
+		);
+			
 		$properties['updated'] = array(
 			'label' => ucfirst($translate->_('common.updated')),
 			'type' => Model_CustomField::TYPE_DATE,

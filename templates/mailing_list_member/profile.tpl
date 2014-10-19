@@ -2,7 +2,7 @@
 {$page_context_id = $mailing_list_member->id}
 
 <div style="float:left">
-	<h1>{$mailing_list_member->name}</h1>
+	<h1>{$mailing_list_member->getLabel()}</h1>
 </div>
 
 <div style="float:right;">

@@ -20,6 +20,7 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 	const LIST_ID = 'list_id';
 	const ADDRESS_ID = 'address_id';
 	const CREATED_AT = 'created_at';
+	const UPDATED_AT = 'updated_at';
 	const STATUS = 'status';
 
 	static function create($fields) {
@@ -67,7 +68,7 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 				);
 				
 				// Log the context update
-				//DevblocksPlatform::markContextChanged(CerberusContexts::CONTEXT_, $batch_ids);
+				DevblocksPlatform::markContextChanged(CerberusContexts::CONTEXT_MAILING_LIST_MEMBER, $batch_ids);
 			}
 		}
 	}
@@ -89,7 +90,7 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 		list($where_sql, $sort_sql, $limit_sql) = self::_getWhereSQL($where, $sortBy, $sortAsc, $limit);
 		
 		// SQL
-		$sql = "SELECT id, list_id, address_id, created_at, status ".
+		$sql = "SELECT id, list_id, address_id, created_at, updated_at, status ".
 			"FROM mailing_list_member ".
 			$where_sql.
 			$sort_sql.
@@ -125,10 +126,11 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 		
 		while($row = mysqli_fetch_assoc($rs)) {
 			$object = new Model_MailingListMember();
-			$object->id = $row['id'];
-			$object->list_id = $row['list_id'];
-			$object->address_id = $row['address_id'];
-			$object->created_at = $row['created_at'];
+			$object->id = intval($row['id']);
+			$object->list_id = intval($row['list_id']);
+			$object->address_id = intval($row['address_id']);
+			$object->created_at = intval($row['created_at']);
+			$object->updated_at = intval($row['updated_at']);
 			$object->status = $row['status'];
 			$objects[$object->id] = $object;
 		}
@@ -182,12 +184,14 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 			"mailing_list_member.list_id as %s, ".
 			"mailing_list_member.address_id as %s, ".
 			"mailing_list_member.created_at as %s, ".
-			"mailing_list_member.status as %s ",
+			"mailing_list_member.updated_at as %s, ".
+			"mailing_list_member.status as %s, ".
 				SearchFields_MailingListMember::ID,
 				SearchFields_MailingListMember::LIST_ID,
 				SearchFields_MailingListMember::ADDRESS_ID,
 				SearchFields_MailingListMember::CREATED_AT,
-				SearchFields_MailingListMember::STATUS
+				SearchFields_MailingListMember::UPDATED_AT,
+				SearchFields_MailingListMember::STATUS,
 			);
 			
 		$join_sql = "FROM mailing_list_member ".
@@ -216,7 +220,7 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 			'tables' => &$tables,
 			'has_multiple_values' => &$has_multiple_values
 		);
-	
+		
 		array_walk_recursive(
 			$params,
 			array('DAO_MailingListMember', '_translateVirtualParameters'),
@@ -290,7 +294,7 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 			$where_sql.
 			($has_multiple_values ? 'GROUP BY mailing_list_member.id ' : '').
 			$sort_sql;
-			
+		
 		if($limit > 0) {
 			$rs = $db->SelectLimit($sql,$limit,$page*$limit) or die(__CLASS__ . '('.__LINE__.')'. ':' . $db->ErrorMsg()); /* @var $rs ADORecordSet */
 		} else {
@@ -330,6 +334,7 @@ class SearchFields_MailingListMember implements IDevblocksSearchFields {
 	const LIST_ID = 'm_list_id';
 	const ADDRESS_ID = 'm_address_id';
 	const CREATED_AT = 'm_created_at';
+	const UPDATED_AT = 'm_updated_at';
 	const STATUS = 'm_status';
 
 	const VIRTUAL_CONTEXT_LINK = '*_context_link';
@@ -350,6 +355,7 @@ class SearchFields_MailingListMember implements IDevblocksSearchFields {
 			self::LIST_ID => new DevblocksSearchField(self::LIST_ID, 'mailing_list_member', 'list_id', $translate->_('cerb.mailing_lists.common.mailing_list')),
 			self::ADDRESS_ID => new DevblocksSearchField(self::ADDRESS_ID, 'mailing_list_member', 'address_id', $translate->_('common.email'), Model_CustomField::TYPE_SINGLE_LINE),
 			self::CREATED_AT => new DevblocksSearchField(self::CREATED_AT, 'mailing_list_member', 'created_at', $translate->_('common.created'), Model_CustomField::TYPE_DATE),
+			self::UPDATED_AT => new DevblocksSearchField(self::UPDATED_AT, 'mailing_list_member', 'updated_at', $translate->_('common.updated'), Model_CustomField::TYPE_DATE),
 			self::STATUS => new DevblocksSearchField(self::STATUS, 'mailing_list_member', 'status', $translate->_('common.status')),
 
 			self::VIRTUAL_CONTEXT_LINK => new DevblocksSearchField(self::VIRTUAL_CONTEXT_LINK, '*', 'context_link', $translate->_('common.links'), null),
@@ -380,6 +386,7 @@ class Model_MailingListMember {
 	public $list_id;
 	public $address_id;
 	public $created_at;
+	public $updated_at;
 	public $status;
 };
 
@@ -547,6 +554,7 @@ class View_MailingListMember extends C4_AbstractView implements IAbstractView_Su
 				break;
 				
 			case SearchFields_MailingListMember::CREATED_AT:
+			case SearchFields_MailingListMember::UPDATED_AT:
 				$tpl->display('devblocks:cerberusweb.core::internal/views/criteria/__date.tpl');
 				break;
 				
@@ -626,6 +634,7 @@ class View_MailingListMember extends C4_AbstractView implements IAbstractView_Su
 				break;
 				
 			case SearchFields_MailingListMember::CREATED_AT:
+			case SearchFields_MailingListMember::UPDATED_AT:
 				$criteria = $this->_doSetCriteriaDate($field, $oper);
 				break;
 				
@@ -790,6 +799,7 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 			'_label' => $prefix,
 			'id' => $prefix.$translate->_('common.id'),
 			'name' => $prefix.$translate->_('common.name'),
+			'created_at' => $prefix.$translate->_('common.created'),
 			'updated_at' => $prefix.$translate->_('common.updated'),
 			'record_url' => $prefix.$translate->_('common.url.record'),
 		);
@@ -799,6 +809,7 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 			'_label' => 'context_url',
 			'id' => Model_CustomField::TYPE_NUMBER,
 			'name' => Model_CustomField::TYPE_SINGLE_LINE,
+			'created_at' => Model_CustomField::TYPE_DATE,
 			'updated_at' => Model_CustomField::TYPE_DATE,
 			'record_url' => Model_CustomField::TYPE_URL,
 		);
@@ -822,6 +833,7 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 			$token_values['_label'] = $mailing_list_member->name;
 			$token_values['id'] = $mailing_list_member->id;
 			$token_values['name'] = $mailing_list_member->name;
+			$token_values['created_at'] = $mailing_list_member->created_at;
 			$token_values['updated_at'] = $mailing_list_member->updated_at;
 			
 			// Custom fields

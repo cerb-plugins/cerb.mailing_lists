@@ -90,8 +90,10 @@
 						{$result.$column|devblocks_prettytime}&nbsp;
 					{/if}
 				</td>
+				
 			{else}
 				<td>{$result.$column}</td>
+				
 			{/if}
 		{/foreach}
 		</tr>
