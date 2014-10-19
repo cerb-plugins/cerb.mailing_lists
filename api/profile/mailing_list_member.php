@@ -105,7 +105,10 @@ class PageSection_ProfilesMailingListMember extends Extension_PageSection {
 		$active_worker = CerberusApplication::getActiveWorker();
 		
 		if(!empty($id) && !empty($do_delete)) { // Delete
-			DAO_MailingListMember::delete($id);
+			if(false !== ($member = DAO_MailingListMember::get($id))) {
+				DAO_MailingListMember::delete($id);
+				DAO_MailingList::updateMemberCount($member->list_id);
+			}
 			
 		} else {
 			if(empty($id)) { // New
