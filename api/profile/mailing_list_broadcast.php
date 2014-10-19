@@ -106,7 +106,11 @@ class PageSection_ProfilesMailingListBroadcast extends Extension_PageSection {
 		$active_worker = CerberusApplication::getActiveWorker();
 		
 		if(!empty($id) && !empty($do_delete)) { // Delete
-			DAO_MailingListBroadcast::delete($id);
+			
+			if(false !== ($broadcast = DAO_MailingListBroadcast::get($id))) {
+				DAO_MailingListBroadcast::delete($id);
+				DAO_MailingList::updateBroadcastCount($broadcast->list_id);
+			}
 			
 		} else {
 			@$name = DevblocksPlatform::importGPC($_REQUEST['name'], 'string', '');
