@@ -26,6 +26,9 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 	static function create($fields) {
 		$db = DevblocksPlatform::getDatabaseService();
 		
+		if(!isset($fields[self::CREATED_AT]))
+			$fields[self::CREATED_AT] = time();
+		
 		$sql = "INSERT INTO mailing_list_member () VALUES ()";
 		$db->Execute($sql);
 		$id = $db->LastInsertId();
@@ -38,6 +41,9 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 	static function update($ids, $fields, $check_deltas=true) {
 		if(!is_array($ids))
 			$ids = array($ids);
+		
+		if(!isset($fields[self::UPDATED_AT]))
+			$fields[self::UPDATED_AT] = time();
 		
 		// Make a diff for the requested objects in batches
 		
@@ -74,6 +80,9 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 	}
 	
 	static function updateWhere($fields, $where) {
+		if(!isset($fields[self::UPDATED_AT]))
+			$fields[self::UPDATED_AT] = time();
+		
 		parent::_updateWhere('mailing_list_member', $fields, $where);
 	}
 	
@@ -831,7 +840,6 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 		$token_labels = array(
 			'_label' => $prefix,
 			'id' => $prefix.$translate->_('common.id'),
-			'name' => $prefix.$translate->_('common.name'),
 			'created_at' => $prefix.$translate->_('common.created'),
 			'updated_at' => $prefix.$translate->_('common.updated'),
 			'record_url' => $prefix.$translate->_('common.url.record'),
@@ -840,11 +848,12 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 		// Token types
 		$token_types = array(
 			'_label' => 'context_url',
-			'id' => Model_CustomField::TYPE_NUMBER,
-			'name' => Model_CustomField::TYPE_SINGLE_LINE,
+			'address_id' => Model_CustomField::TYPE_NUMBER,
 			'created_at' => Model_CustomField::TYPE_DATE,
-			'updated_at' => Model_CustomField::TYPE_DATE,
+			'id' => Model_CustomField::TYPE_NUMBER,
+			'list_id' => Model_CustomField::TYPE_NUMBER,
 			'record_url' => Model_CustomField::TYPE_URL,
+			'updated_at' => Model_CustomField::TYPE_DATE,
 		);
 		
 		// Custom field/fieldset token labels
@@ -862,10 +871,13 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 		$token_values['_types'] = $token_types;
 		
 		if($mailing_list_member) {
+			$_label = $mailing_list_member->getLabel();
+			
 			$token_values['_loaded'] = true;
-			$token_values['_label'] = $mailing_list_member->name;
+			$token_values['_label'] = $_label;
+			$token_values['address_id'] = $mailing_list_member->address_id;
 			$token_values['id'] = $mailing_list_member->id;
-			$token_values['name'] = $mailing_list_member->name;
+			$token_values['list_id'] = $mailing_list_member->list_id;
 			$token_values['created_at'] = $mailing_list_member->created_at;
 			$token_values['updated_at'] = $mailing_list_member->updated_at;
 			
@@ -874,7 +886,7 @@ class Context_MailingListMember extends Extension_DevblocksContext implements ID
 			
 			// URL
 			$url_writer = DevblocksPlatform::getUrlService();
-			$token_values['record_url'] = $url_writer->writeNoProxy(sprintf("c=profiles&type=mailing_list_member&id=%d-%s",$mailing_list_member->id, DevblocksPlatform::strToPermalink($mailing_list_member->name)), true);
+			$token_values['record_url'] = $url_writer->writeNoProxy(sprintf("c=profiles&type=mailing_list_member&id=%d-%s",$mailing_list_member->id, DevblocksPlatform::strToPermalink($_label)), true);
 		}
 		
 		return true;

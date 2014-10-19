@@ -33,6 +33,9 @@ class DAO_MailingList extends Cerb_ORMHelper {
 	static function create($fields) {
 		$db = DevblocksPlatform::getDatabaseService();
 		
+		if(!isset($fields[self::CREATED_AT]))
+			$fields[self::CREATED_AT] = time();
+		
 		$sql = "INSERT INTO mailing_list () VALUES ()";
 		$db->Execute($sql);
 		$id = $db->LastInsertId();
@@ -45,6 +48,9 @@ class DAO_MailingList extends Cerb_ORMHelper {
 	static function update($ids, $fields, $check_deltas=true) {
 		if(!is_array($ids))
 			$ids = array($ids);
+		
+		if(!isset($fields[self::UPDATED_AT]))
+			$fields[self::UPDATED_AT] = time();
 		
 		// Make a diff for the requested objects in batches
 		
@@ -83,6 +89,9 @@ class DAO_MailingList extends Cerb_ORMHelper {
 	}
 	
 	static function updateWhere($fields, $where) {
+		if(!isset($fields[self::UPDATED_AT]))
+			$fields[self::UPDATED_AT] = time();
+		
 		parent::_updateWhere('mailing_list', $fields, $where);
 		self::clearCache();
 	}

@@ -49,10 +49,10 @@ class PageSection_ProfilesMailingListMember extends Extension_PageSection {
 			
 		$properties = array();
 			
-		$properties['name'] = array(
-			'label' => ucfirst($translate->_('common.name')),
-			'type' => Model_CustomField::TYPE_SINGLE_LINE,
-			'value' => $mailing_list_member->name,
+		$properties['created'] = array(
+			'label' => ucfirst($translate->_('common.created')),
+			'type' => Model_CustomField::TYPE_DATE,
+			'value' => $mailing_list_member->created_at,
 		);
 			
 		$properties['updated'] = array(
@@ -60,7 +60,6 @@ class PageSection_ProfilesMailingListMember extends Extension_PageSection {
 			'type' => Model_CustomField::TYPE_DATE,
 			'value' => $mailing_list_member->updated_at,
 		);
-			
 	
 		// Custom Fields
 
@@ -109,12 +108,10 @@ class PageSection_ProfilesMailingListMember extends Extension_PageSection {
 			DAO_MailingListMember::delete($id);
 			
 		} else {
-			@$name = DevblocksPlatform::importGPC($_REQUEST['name'], 'string', '');
-			
 			if(empty($id)) { // New
 				$fields = array(
+					DAO_MailingListMember::CREATED_AT => time(),
 					DAO_MailingListMember::UPDATED_AT => time(),
-					DAO_MailingListMember::NAME => $name,
 				);
 				$id = DAO_MailingListMember::create($fields);
 				
@@ -136,7 +133,6 @@ class PageSection_ProfilesMailingListMember extends Extension_PageSection {
 			} else { // Edit
 				$fields = array(
 					DAO_MailingListMember::UPDATED_AT => time(),
-					DAO_MailingListMember::NAME => $name,
 				);
 				DAO_MailingListMember::update($id, $fields);
 				
