@@ -79,11 +79,21 @@
 		{foreach from=$view->view_columns item=column name=columns}
 			{if substr($column,0,3)=="cf_"}
 				{include file="devblocks:cerberusweb.core::internal/custom_fields/view/cell_renderer.tpl"}
-			{elseif $column == "m_name"}
+				
+			{elseif $column == "a_email"}
 			<td>
-				<a href="{devblocks_url}c=profiles&type=mailing_list_member&id={$result.m_id}-{$result.m_name|devblocks_permalink}{/devblocks_url}" class="subject">{$result.m_name}</a>
+				<a href="{devblocks_url}c=profiles&type=mailing_list_member&id={$result.m_id}-{$result.a_email|devblocks_permalink}{/devblocks_url}" class="subject">{$result.a_email}</a>
 				<button type="button" class="peek" style="visibility:hidden;padding:1px;margin:0px 5px;" onclick="genericAjaxPopup('peek','c=internal&a=showPeekPopup&context={$view_context}&context_id={$result.m_id}&view_id={$view->id}',null,false,'550');"><span class="cerb-sprite2 sprite-document-search-result" style="margin-left:2px" title="{$translate->_('views.peek')}"></span></button>
 			</td>
+			
+			{elseif $column == "m_list_id"}
+				<td>
+				{if isset($mailing_lists.{$result.$column})}
+				{$list = $mailing_lists.{$result.$column}}
+				<a href="{devblocks_url}c=profiles&a=mailing_list&id={$list->id}{/devblocks_url}-{$list->name|devblocks_permalink}">{$list->name}</a>
+				{/if}
+				</td>
+			
 			{elseif $column == "m_created_at"}
 				<td title="{$result.$column|devblocks_date}">
 					{if !empty($result.$column)}

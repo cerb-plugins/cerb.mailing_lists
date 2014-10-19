@@ -186,15 +186,22 @@ class DAO_MailingListMember extends Cerb_ORMHelper {
 			"mailing_list_member.created_at as %s, ".
 			"mailing_list_member.updated_at as %s, ".
 			"mailing_list_member.status as %s, ".
+			"address.email as %s, ".
+			"address.first_name as %s, ".
+			"address.last_name as %s ",
 				SearchFields_MailingListMember::ID,
 				SearchFields_MailingListMember::LIST_ID,
 				SearchFields_MailingListMember::ADDRESS_ID,
 				SearchFields_MailingListMember::CREATED_AT,
 				SearchFields_MailingListMember::UPDATED_AT,
 				SearchFields_MailingListMember::STATUS,
+				SearchFields_MailingListMember::ADDRESS_EMAIL,
+				SearchFields_MailingListMember::ADDRESS_FIRST_NAME,
+				SearchFields_MailingListMember::ADDRESS_LAST_NAME
 			);
 			
 		$join_sql = "FROM mailing_list_member ".
+			"INNER JOIN address ON (address.id = mailing_list_member.address_id) ".
 			(isset($tables['context_link']) ? sprintf("INNER JOIN context_link ON (context_link.to_context = %s AND context_link.to_context_id = mailing_list_member.id) ", Cerb_ORMHelper::qstr(CerberusContexts::CONTEXT_MAILING_LIST_MEMBER)) : " ").
 			'';
 		
@@ -344,6 +351,10 @@ class SearchFields_MailingListMember implements IDevblocksSearchFields {
 	const CONTEXT_LINK = 'cl_context_from';
 	const CONTEXT_LINK_ID = 'cl_context_from_id';
 	
+	const ADDRESS_EMAIL = 'a_email';
+	const ADDRESS_FIRST_NAME = 'a_first_name';
+	const ADDRESS_LAST_NAME = 'a_last_name';
+	
 	/**
 	 * @return DevblocksSearchField[]
 	 */
@@ -357,6 +368,10 @@ class SearchFields_MailingListMember implements IDevblocksSearchFields {
 			self::CREATED_AT => new DevblocksSearchField(self::CREATED_AT, 'mailing_list_member', 'created_at', $translate->_('common.created'), Model_CustomField::TYPE_DATE),
 			self::UPDATED_AT => new DevblocksSearchField(self::UPDATED_AT, 'mailing_list_member', 'updated_at', $translate->_('common.updated'), Model_CustomField::TYPE_DATE),
 			self::STATUS => new DevblocksSearchField(self::STATUS, 'mailing_list_member', 'status', $translate->_('common.status')),
+				
+			self::ADDRESS_EMAIL => new DevblocksSearchField(self::ADDRESS_EMAIL, 'address', 'email', $translate->_('common.email'), Model_CustomField::TYPE_SINGLE_LINE),
+			self::ADDRESS_FIRST_NAME => new DevblocksSearchField(self::ADDRESS_FIRST_NAME, 'address', 'first_name', $translate->_('address.first_name'), Model_CustomField::TYPE_SINGLE_LINE),
+			self::ADDRESS_LAST_NAME => new DevblocksSearchField(self::ADDRESS_LAST_NAME, 'address', 'last_name', $translate->_('address.last_name'), Model_CustomField::TYPE_SINGLE_LINE),
 
 			self::VIRTUAL_CONTEXT_LINK => new DevblocksSearchField(self::VIRTUAL_CONTEXT_LINK, '*', 'context_link', $translate->_('common.links'), null),
 			self::VIRTUAL_HAS_FIELDSET => new DevblocksSearchField(self::VIRTUAL_HAS_FIELDSET, '*', 'has_fieldset', $translate->_('common.fieldset'), null),
@@ -369,6 +384,7 @@ class SearchFields_MailingListMember implements IDevblocksSearchFields {
 		// Custom Fields
 		$custom_columns = DevblocksSearchField::getCustomSearchFieldsByContexts(array(
 			CerberusContexts::CONTEXT_MAILING_LIST_MEMBER,
+			CerberusContexts::CONTEXT_ADDRESS,
 		));
 		
 		if(!empty($custom_columns))
@@ -388,6 +404,17 @@ class Model_MailingListMember {
 	public $created_at;
 	public $updated_at;
 	public $status;
+	
+	// Lazy load
+	private $_address = null;
+	
+	function getLabel() {
+		if(is_null($this->_address))
+			if(false == ($this->_address = DAO_Address::get($this->address_id)))
+				return null;
+			
+		return $this->_address->getNameWithEmail();
+	}
 };
 
 class View_MailingListMember extends C4_AbstractView implements IAbstractView_Subtotals {
@@ -403,19 +430,21 @@ class View_MailingListMember extends C4_AbstractView implements IAbstractView_Su
 		$this->renderSortAsc = true;
 
 		$this->view_columns = array(
-			SearchFields_MailingListMember::ADDRESS_ID,
+			SearchFields_MailingListMember::ADDRESS_EMAIL,
 			SearchFields_MailingListMember::LIST_ID,
 			SearchFields_MailingListMember::CREATED_AT,
 			SearchFields_MailingListMember::STATUS,
 		);
 		
 		$this->addColumnsHidden(array(
+			SearchFields_MailingListMember::ADDRESS_ID,
 			SearchFields_MailingListMember::VIRTUAL_CONTEXT_LINK,
 			SearchFields_MailingListMember::VIRTUAL_HAS_FIELDSET,
 			SearchFields_MailingListMember::VIRTUAL_WATCHERS,
 		));
 		
 		$this->addParamsHidden(array(
+			SearchFields_MailingListMember::ADDRESS_ID,
 		));
 		
 		$this->doResetCriteria();
@@ -525,6 +554,10 @@ class View_MailingListMember extends C4_AbstractView implements IAbstractView_Su
 		$tpl->assign('id', $this->id);
 		$tpl->assign('view', $this);
 
+		// Mailing lists
+		$mailing_lists = DAO_MailingList::getAll();
+		$tpl->assign('mailing_lists', $mailing_lists);
+		
 		// Custom fields
 		$custom_fields = DAO_CustomField::getByContext(CerberusContexts::CONTEXT_MAILING_LIST_MEMBER);
 		$tpl->assign('custom_fields', $custom_fields);
